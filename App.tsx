@@ -11,6 +11,7 @@ import {
 import theme from './src/global/styles/theme';
 import { Text, View } from 'react-native';
 import React from 'react';
+import Register from './src/screens/Register';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -27,7 +28,8 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <View style={{ backgroundColor: '#eee', flex: 1 }}>
-        <Dashboard />
+        {/* <Dashboard /> */}
+        <Register />
       </View>
     </ThemeProvider >
   );
