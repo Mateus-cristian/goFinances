@@ -5,6 +5,7 @@ import Button from '../../components/Forms/Button'
 import { Container, Header, Title, Form, Fields } from './styles'
 import TransactionTypeButton from '../../components/Forms/TransactionTypeButton'
 import { View } from 'react-native'
+import CategorySelect from '../../components/Forms/CategorySelect'
 
 export default function Register() {
 
@@ -26,7 +27,7 @@ export default function Register() {
                         placeholder='Nome' />
                     <Input
                         placeholder='Preço' />
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
                         <TransactionTypeButton
                             isActive={buttonSelected === 'up'}
                             title='income'
@@ -38,6 +39,7 @@ export default function Register() {
                             type='down'
                             onPress={() => handleTransactionsTypeSelect('down')} />
                     </View>
+                    <CategorySelect title='categoria' />
                 </Fields>
 
                 <Button title='Enviar' />
