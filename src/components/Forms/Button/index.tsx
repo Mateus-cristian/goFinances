@@ -4,13 +4,15 @@ import { TouchableOpacityProps } from 'react-native'
 import { Container, Title } from './styles'
 
 interface Props extends TouchableOpacityProps {
-    title: string
+    title: string;
+
 }
 
 function Button({ title, ...rest }: Props) {
+
     return (
         <Container>
-            <Title>
+            <Title {...rest}>
                 {title}
             </Title>
         </Container>
