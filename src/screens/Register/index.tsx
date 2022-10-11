@@ -88,7 +88,7 @@ export default function Register() {
                             autoCapitalize='sentences'
                             autoCorrect={false}
                             error={errors.name && errors.name.message}
-                        //    
+
                         />
                         <InputForm
                             name='amount'
@@ -104,12 +104,12 @@ export default function Register() {
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
                             <TransactionTypeButton
                                 isActive={transationType === 'up'}
-                                title='income'
+                                title='Entradas'
                                 type='up'
                                 onPress={() => handleTransactionsTypeSelect('up')} />
                             <TransactionTypeButton
                                 isActive={transationType === 'down'}
-                                title='outcome'
+                                title='Saídas'
                                 type='down'
                                 onPress={() => handleTransactionsTypeSelect('down')} />
                         </View>
@@ -118,7 +118,7 @@ export default function Register() {
                             onPress={handleOpenModal} />
                     </Fields>
 
-                    {/* <Button title='Enviar' onPress={handleSubmit()} /> */}
+                    <Button title='Enviar' onPress={handleSubmit()} />
 
                 </Form>
 

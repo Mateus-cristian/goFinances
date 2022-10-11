@@ -4,7 +4,7 @@ import HighlightCard from '../../components/HighlightCard'
 import { TransactionCard, TransactionCardProps } from '../../components/HighlightCard/TransactionCard'
 import { TransactionsList } from '../../components/HighlightCard/TransactionCard/styles'
 import {
-    Transactions, Title, Container, Header, UserWrapper, UserInfo, Photo, User, UserGreeting, UserName, Icon, HighlightCards
+    Transactions, LogoutButton, Title, Container, Header, UserWrapper, UserInfo, Photo, User, UserGreeting, UserName, Icon, HighlightCards
 } from './styles'
 
 export interface DataListProps extends TransactionCardProps {
@@ -59,7 +59,11 @@ function Dashboard() {
                             <UserName>Mateus</UserName>
                         </User>
                     </UserInfo>
-                    <Icon name='power' />
+                    <LogoutButton onPress={() => { }}>
+
+
+                        <Icon name='power' />
+                    </LogoutButton>
                 </UserWrapper>
             </Header>
             <HighlightCards >

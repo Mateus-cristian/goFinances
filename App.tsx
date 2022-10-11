@@ -13,6 +13,8 @@ import { Text, View } from 'react-native';
 import React from 'react';
 import Register from './src/screens/Register';
 
+import { NavigationContainer } from '@react-navigation/native'
+import { AppRoutes } from './src/routes/app.routes'
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -28,9 +30,11 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <View style={{ backgroundColor: '#eee', flex: 1 }}>
-        <Register />
-      </View>
+      <NavigationContainer>
+        <View style={{ backgroundColor: '#eee', flex: 1 }}>
+          <AppRoutes />
+        </View>
+      </NavigationContainer>
     </ThemeProvider >
   );
 }
