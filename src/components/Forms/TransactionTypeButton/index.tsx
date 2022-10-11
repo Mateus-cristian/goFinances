@@ -14,9 +14,9 @@ const icons: any = {
 }
 function TransactionTypeButton({ title, type, isActive, ...rest }: Props) {
     return (
-        <Container {...rest} isActive={isActive} type={type}>
+        <Container isActive={isActive} type={type}>
             <Icon name={icons[type]} type={type} />
-            <Title>
+            <Title {...rest} >
                 {title}
             </Title>
         </Container>

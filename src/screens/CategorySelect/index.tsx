@@ -20,7 +20,6 @@ export default function CategorySelect({ category, closeSelectCategory, setCateg
 
     function handleCategorySelect(category: Category) {
         setCategory({ key: '', name: '' })
-
         setCategory(category)
     }
 
