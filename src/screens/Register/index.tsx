@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import Input from '../../components/Forms/input'
+import React, { useEffect, useState } from 'react'
 import Button from '../../components/Forms/Button'
 
 import { Modal, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
@@ -13,7 +12,10 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import CategorySelect from '../CategorySelect';
 import { useForm } from 'react-hook-form'
 import InputForm from '../../components/Forms/InputForm'
+import { useNavigation } from '@react-navigation/native'
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
 
 interface FormData {
     name: string;
@@ -26,13 +28,16 @@ const schema = object().shape({
 })
 
 export default function Register() {
-    const [transationType, setTransactionType] = useState('')
+    const dataKey = "@goFinance:transactions";
+    const navigation = useNavigation()
 
+    const [transationType, setTransactionType] = useState('')
     const [categoryOpenModal, setCategoryOpenModal] = useState(false)
     const [category, setCategory] = useState({
         name: '',
         key: '',
     })
+
 
     const { control, handleSubmit, formState: { errors }, reset } = useForm({
         resolver: yupResolver(schema)
@@ -52,7 +57,7 @@ export default function Register() {
         setCategoryOpenModal(true)
     }
 
-    function handleRegister(form: FormData) {
+    async function handleRegister(form: any) {
         if (!transationType) {
             return Alert.alert('Selecione o tipo da transação');
         }
@@ -60,18 +65,53 @@ export default function Register() {
             return Alert.alert('Selecione a categoria');
         }
 
-        const data = {
+        const newTransaction = {
+            id: String(uuid.v4()),
             name: form.name,
             amount: form.amount,
             transationType,
-            category: category.key
+            category: category.name,
+            date: new Date()
         }
-        console.log("🚀 ~ file: index.tsx ~ line 53 ~ handleRegister ~ data", data)
+
+        try {
+            const data = await AsyncStorage.getItem(dataKey)
+            const currentData = data ? JSON.parse(data) : []
+
+            const dataFormatted =
+                [
+                    ...currentData,
+                    newTransaction
+                ]
+
+
+            await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted))
+
+        } catch (error) {
+            console.log(error)
+            Alert.alert('Não foi possível cadastrar')
+        }
 
         reset()
         setTransactionType('')
         setCategory({ key: '', name: '' })
+        navigation.navigate('Listagem')
     }
+
+    useEffect(() => {
+        async function loadData() {
+            const result = await AsyncStorage.getItem(dataKey)
+            console.log("🚀 ~ file: index.tsx ~ line 86 ~ loadData ~ result", result)
+        }
+        loadData()
+
+        // async function removeData() {
+        //     const result = await AsyncStorage.removeItem(dataKey)
+        //     return result
+        // }
+
+        // removeData()
+    }, [])
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -118,11 +158,11 @@ export default function Register() {
                             onPress={handleOpenModal} />
                     </Fields>
 
-                    <Button title='Enviar' onPress={handleSubmit()} />
+                    <Button title='Enviar' onPress={handleSubmit(handleRegister)} />
 
                 </Form>
 
-                <Modal visible={categoryOpenModal}>
+                <Modal visible={categoryOpenModal} >
                     <CategorySelect
                         category={category}
                         setCategory={setCategory}
