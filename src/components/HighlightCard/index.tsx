@@ -28,7 +28,7 @@ export default function HighlightCard({
             </Header>
 
             <Footer>
-                <Amount>R$ {amount}</Amount>
+                <Amount>{amount}</Amount>
                 <LastTransaction>{lastTransaction}</LastTransaction>
             </Footer>
         </Container>

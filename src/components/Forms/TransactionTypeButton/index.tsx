@@ -4,13 +4,13 @@ import { Container, Icon, Title } from './styles'
 
 interface Props extends TouchableOpacityProps {
     title: string;
-    type: 'up' | 'down'
+    type: 'positive' | 'negative'
     isActive: boolean;
 }
 
 const icons: any = {
-    up: 'arrow-up-circle',
-    down: 'arrow-down-circle'
+    positive: 'arrow-up-circle',
+    negative: 'arrow-down-circle'
 }
 function TransactionTypeButton({ title, type, isActive, ...rest }: Props) {
     return (
