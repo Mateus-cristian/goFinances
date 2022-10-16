@@ -37,7 +37,7 @@ export const ChartContainer = styled.View`
   align-items: center;
 `;
 
-export const Content = styled.View``;
+export const Content = styled.ScrollView``;
 
 export const MonthSelect = styled.View`
   width: 100%;
@@ -57,4 +57,11 @@ export const MonthSelectButton = styled.TouchableOpacity``;
 
 export const MonthSelectIcon = styled(Feather)`
   font-size: ${RFValue(24)}px;
+`;
+
+export const LoadContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  margin-top: 100px;
 `;
