@@ -19,6 +19,8 @@ import { AppRoutes } from './src/routes/app.routes'
 import 'intl';
 import 'intl/locale-data/jsonp/pt-BR'
 
+import { SignIn } from './src/screens/SignIn'
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -36,7 +38,8 @@ export default function App() {
       <StatusBar barStyle={'light-content'} />
       <NavigationContainer>
         <View style={{ backgroundColor: '#eee', flex: 1 }}>
-          <AppRoutes />
+          {/* <AppRoutes /> */}
+          <SignIn />
         </View>
       </NavigationContainer>
     </ThemeProvider >
