@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native'
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
+import { useAuth } from '../../hooks/auth'
 
 interface FormData {
     name: string;
@@ -27,8 +28,12 @@ const schema = object().shape({
     amount: number().positive('Valor não pode ser negativo').required('Preço deve ser informado')
 })
 
+
 export default function Register() {
-    const dataKey = "@goFinance:transactions";
+
+    const { user } = useAuth()
+
+    const dataKey = `@goFinance:transactions_user:${user.id}`;
     const navigation = useNavigation()
 
     const [transationType, setTransactionType] = useState('')
@@ -101,7 +106,6 @@ export default function Register() {
     useEffect(() => {
         async function loadData() {
             const result = await AsyncStorage.getItem(dataKey)
-            console.log("🚀 ~ file: index.tsx ~ line 86 ~ loadData ~ result", result)
         }
         loadData()
 

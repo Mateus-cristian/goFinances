@@ -26,27 +26,31 @@ interface HighlightData {
 }
 
 function Dashboard() {
+    const { signOut, user } = useAuth()
+
     const [isLoading, setIsLoading] = useState(true)
     const [transactions, setTransactions] = useState<DataListProps[]>([]);
-    const dataKey = "@goFinance:transactions";
+    const dataKey = `@goFinance:transactions_user:${user.id}`;
     const [highlightData, setHighlightData] = useState<HighlightData>({} as HighlightData)
 
     const theme = useTheme()
 
-    const { signOut, user } = useAuth()
 
     function getLastTransactionData(collection: DataListProps[], type: 'positive' | 'negative') {
-        if (collection.length > 0) {
-            const lastTransaction = new Date(
-                Math.max.apply(Math, collection
-                    .filter((x) => x.type === type)
-                    .map((y) => new Date(y.date).getTime()))
-            )
 
+        const collectionFiltered = collection.filter(transaction => transaction.type === type);
 
-            return `${lastTransaction.getDate()} de ${lastTransaction.toLocaleString('pt-BR', { month: 'long' })}`
+        if (collectionFiltered.length === 0) {
+            return 0;
         }
-        return '';
+        const lastTransaction = new Date(
+            Math.max.apply(Math, collectionFiltered
+                .map((y) => new Date(y.date).getTime()))
+        )
+
+
+        return `${lastTransaction.getDate()} de ${lastTransaction.toLocaleString('pt-BR', { month: 'long' })}`
+
     }
 
     async function loadTransactions() {
@@ -102,9 +106,9 @@ function Dashboard() {
                     style: 'currency',
                     currency: 'BRL',
                 }),
-            lastTransactionEntriesDate: `Última entrada dia ${lastTransactionEntries}`,
-            lastTransactionExpansiveDate: `Última saída dia ${lastTransactionExpensive}`,
-            totalTransactions: totalInterval
+            lastTransactionEntriesDate: lastTransactionEntries === 0 ? '' : `Última entrada dia ${lastTransactionEntries}`,
+            lastTransactionExpansiveDate: lastTransactionExpensive === 0 ? '' : `Última saída dia ${lastTransactionExpensive}`,
+            totalTransactions: (lastTransactionEntries && lastTransactionExpensive) ? totalInterval : ''
         })
 
         setIsLoading(false)
@@ -112,6 +116,7 @@ function Dashboard() {
 
     useEffect(() => {
         loadTransactions()
+
     }, [])
 
     useFocusEffect(useCallback(() => {
