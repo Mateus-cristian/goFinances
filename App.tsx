@@ -21,6 +21,8 @@ import 'intl/locale-data/jsonp/pt-BR'
 
 import { SignIn } from './src/screens/SignIn'
 
+import { AuthProvider } from './src/hooks/auth';
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -32,14 +34,16 @@ export default function App() {
   if (!fontsLoaded) {
     return <View><Text>Carregando</Text></View>
   }
-
+  // id: 69456234871 - obihlmqcpvr2b63al2c3am8mn6fu9cpq.apps.googleusercontent.com
+  // key: GOCSPX - dwnO6VNqa0G - fj3ize098MyURfI7
   return (
     <ThemeProvider theme={theme}>
       <StatusBar barStyle={'light-content'} />
       <NavigationContainer>
         <View style={{ backgroundColor: '#eee', flex: 1 }}>
-          {/* <AppRoutes /> */}
-          <SignIn />
+          <AuthProvider>
+            <SignIn />
+          </AuthProvider>
         </View>
       </NavigationContainer>
     </ThemeProvider >
