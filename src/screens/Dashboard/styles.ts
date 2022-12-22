@@ -54,9 +54,12 @@ export const UserName = styled.Text`
   font-family: ${({ theme }) => theme.fonts.bold};
   font-size: ${RFValue(18)}px;
   line-height: 24px;
+  text-transform: capitalize;
 `;
 
-export const LogoutButton = styled(BorderlessButton)``;
+export const LogoutButton = styled.TouchableOpacity.attrs({
+  activeOpacity: 0.7,
+})``;
 
 export const Icon = styled(Feather)`
   font-size: ${RFValue(24)}px;
