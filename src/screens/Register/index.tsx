@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Button from '../../components/Forms/Button'
 
-import { Modal, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
-import { Container, Header, Title, Form, Fields } from './styles'
+import { Modal, TouchableWithoutFeedback, Keyboard, Alert, Text } from 'react-native'
+import { Container, Header, Title, Form, Fields, ButtonCalendar, TitleButtonCalendar } from './styles'
 import TransactionTypeButton from '../../components/Forms/TransactionTypeButton'
 import { View } from 'react-native'
 import CategorySelectButton from '../../components/Forms/CategorySelectButton'
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 import { string, number, object } from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -30,6 +31,32 @@ const schema = object().shape({
 
 
 export default function Register() {
+
+    const [date, setDate] = useState(null);
+
+    const onChange = (event: any, selectedDate: any) => {
+        const currentDate = selectedDate;
+        setDate(currentDate);
+    };
+
+    const showMode = (currentMode: string) => {
+        DateTimePickerAndroid.open({
+            value: date === null ? new Date() : date,
+            onChange,
+
+            is24Hour: true,
+        });
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const showTimepicker = () => {
+        showMode('time');
+    };
+
+    //---------------------------------------------------------------------------
 
     const { user } = useAuth()
 
@@ -76,7 +103,7 @@ export default function Register() {
             amount: form.amount,
             type: transationType,
             category: category.key,
-            date: new Date()
+            date: date
         }
 
         try {
@@ -109,13 +136,18 @@ export default function Register() {
         }
         loadData()
 
-        // async function removeData() {
-        //     const result = await AsyncStorage.removeItem(dataKey)
-        //     return result
-        // }
 
-        // removeData()
     }, [])
+
+    function formatDate(date: Date) {
+        const formattedDate = date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+
+        return formattedDate;
+    }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -143,7 +175,9 @@ export default function Register() {
                             keyboardType='numeric'
                             error={errors.amount && errors.amount.message}
                         />
-
+                        <ButtonCalendar onPress={showTimepicker} title="Show time picker!">
+                            <TitleButtonCalendar>{`${date === null ? 'Data' : formatDate(date)}`}</TitleButtonCalendar>
+                        </ButtonCalendar>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
                             <TransactionTypeButton
