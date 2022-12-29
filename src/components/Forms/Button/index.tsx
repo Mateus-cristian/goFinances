@@ -5,14 +5,13 @@ import { Container, Title } from './styles'
 
 interface Props extends TouchableOpacityProps {
     title: string;
-
 }
 
 function Button({ title, ...rest }: Props) {
 
     return (
-        <Container>
-            <Title {...rest}>
+        <Container {...rest}>
+            <Title>
                 {title}
             </Title>
         </Container>

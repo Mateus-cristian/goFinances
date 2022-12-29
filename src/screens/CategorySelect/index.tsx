@@ -36,7 +36,7 @@ export default function CategorySelect({ category, closeSelectCategory, setCateg
                 renderItem={({ item }) => (
                     <Category
                         onPress={() => handleCategorySelect(item)}
-                        isActive={category.key === item.key}
+                        isActive={category.name === item.name}
                     >
                         <Icon name={item.icon} />
                         <Name>{item.name}</Name>
@@ -46,7 +46,7 @@ export default function CategorySelect({ category, closeSelectCategory, setCateg
             />
 
             <Footer >
-                <Button title='Selecionar' onPress={(closeSelectCategory)} />
+                <Button title='Selecionar' onPress={closeSelectCategory} />
             </Footer>
         </Container>
     )
