@@ -53,6 +53,8 @@ function Dashboard() {
 
     }
 
+
+    // Função que carrega os dados da página 
     async function loadTransactions() {
         const response = await AsyncStorage.getItem(dataKey);
         const transactions: DataListProps[] = response ? JSON.parse(response) : [];
@@ -114,6 +116,26 @@ function Dashboard() {
         setIsLoading(false)
     }
 
+
+    //deleta um card na HOME
+    async function deleteCard(id: string) {
+
+        const response = await AsyncStorage.getItem(dataKey);
+        if (response) {
+            // converte para array
+            const convertedResponseInArray = JSON.parse(response)
+            //filtra pelas transaction menos a passada
+            const filterPayments = convertedResponseInArray.filter((transaction: any) => transaction.id !== id);
+            //converte em string para guardar no storage novamente
+            const convertedArrayToString = JSON.stringify(filterPayments)
+
+            AsyncStorage.setItem(dataKey, convertedArrayToString);
+            //carrega as transações para atualizar a página
+            loadTransactions()
+        }
+
+    }
+
     useEffect(() => {
         loadTransactions()
 
@@ -141,8 +163,6 @@ function Dashboard() {
                                     </User>
                                 </UserInfo>
                                 <LogoutButton onPress={signOut}>
-
-
                                     <Icon name='power' />
                                 </LogoutButton>
                             </UserWrapper>
@@ -159,7 +179,7 @@ function Dashboard() {
                             <TransactionsList
                                 data={transactions}
                                 keyExtractor={item => item.id}
-                                renderItem={({ item }) => <TransactionCard key={item.id} data={item} />}
+                                renderItem={({ item }) => <TransactionCard key={item.id} data={item} deleteCard={deleteCard} />}
                             />
 
 

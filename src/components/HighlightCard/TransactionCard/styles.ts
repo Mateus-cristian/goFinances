@@ -16,6 +16,13 @@ export const Container = styled.View`
   margin-bottom: 16px;
 `;
 
+export const Header = styled.View`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+`;
+
 export const Title = styled.Text`
   font-size: ${RFValue(14)}px;
   font-family: ${({ theme }) => theme.fonts.regular};
