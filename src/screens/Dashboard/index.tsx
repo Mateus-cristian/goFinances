@@ -11,6 +11,9 @@ import { ActivityIndicator } from 'react-native'
 import { useTheme } from 'styled-components'
 import { useAuth } from '../../hooks/auth'
 
+import { useNavigation } from '@react-navigation/native';
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { RootStackParamList } from '../../@types/types'
 
 export interface DataListProps extends TransactionCardProps {
     id: string
@@ -25,6 +28,8 @@ interface HighlightData {
     totalTransactions: string;
 }
 
+
+
 function Dashboard() {
     const { signOut, user } = useAuth()
 
@@ -33,8 +38,8 @@ function Dashboard() {
     const dataKey = `@goFinance:transactions_user:${user.id}`;
     const [highlightData, setHighlightData] = useState<HighlightData>({} as HighlightData)
 
+    const navigation = useNavigation<NavigationProp<RootStackParamList, 'Cadastrar'>>();
     const theme = useTheme()
-
 
     function getLastTransactionData(collection: DataListProps[], type: 'positive' | 'negative') {
 
@@ -119,24 +124,39 @@ function Dashboard() {
 
     //deleta um card na HOME
     async function deleteCard(id: string) {
-
         const response = await AsyncStorage.getItem(dataKey);
         if (response) {
             // converte para array
             const convertedResponseInArray = JSON.parse(response)
             //filtra pelas transaction menos a passada
             const filterPayments = convertedResponseInArray.filter((transaction: any) => transaction.id !== id);
-            //converte em string para guardar no storage novamente
-            const convertedArrayToString = JSON.stringify(filterPayments)
+            if (filterPayments) {
+                //converte em string para guardar no storage novamente
+                const convertedArrayToString = JSON.stringify(filterPayments)
+                AsyncStorage.setItem(dataKey, convertedArrayToString);
+                //carrega as transações para atualizar a página
+                loadTransactions()
+            }
+        }
 
-            AsyncStorage.setItem(dataKey, convertedArrayToString);
-            //carrega as transações para atualizar a página
-            loadTransactions()
+    }
+
+    async function editCard(id: string) {
+        const response = await AsyncStorage.getItem(dataKey);
+        if (response) {
+            // converte para array
+            const convertedResponseInArray = JSON.parse(response)
+            //filtra pelas transaction menos a passada
+            const filterPayments = convertedResponseInArray.filter((transaction: any) => transaction.id === id);
+
+
+            navigation.navigate('Cadastrar', filterPayments[0])
         }
 
     }
 
     useEffect(() => {
+        // AsyncStorage.setItem(dataKey, '');
         loadTransactions()
 
     }, [])
@@ -179,7 +199,7 @@ function Dashboard() {
                             <TransactionsList
                                 data={transactions}
                                 keyExtractor={item => item.id}
-                                renderItem={({ item }) => <TransactionCard key={item.id} data={item} deleteCard={deleteCard} />}
+                                renderItem={({ item }) => <TransactionCard key={item.id} data={item} deleteCard={deleteCard} editCard={editCard} />}
                             />
 
 

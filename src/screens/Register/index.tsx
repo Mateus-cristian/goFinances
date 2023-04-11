@@ -13,11 +13,14 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import CategorySelect from '../CategorySelect';
 import { useForm } from 'react-hook-form'
 import InputForm from '../../components/Forms/InputForm'
-import { useNavigation } from '@react-navigation/native'
+import { NavigationProp, RouteProp, useNavigation } from '@react-navigation/native'
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
 import { useAuth } from '../../hooks/auth'
+
+import { useRoute } from '@react-navigation/native';
+import { RootStackParamList } from '../../@types/types'
 
 interface FormData {
     name: string;
@@ -25,14 +28,26 @@ interface FormData {
 }
 
 const schema = object().shape({
+    id: string().nullable(),
     name: string().required('Nome deve ser informado'),
-    amount: number().positive('Valor não pode ser negativo').required('Preço deve ser informado')
+    amount: string().required('Preço deve ser informado')
 })
+
+interface RouteParams {
+    amount: number;
+    category: string;
+    date: string;
+    id: string;
+    name: string;
+    type: 'positive' | 'negative';
+}
 
 
 export default function Register() {
 
-    const [date, setDate] = useState(null);
+    const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
+    const navigation = useNavigation<NavigationProp<RootStackParamList, 'Listagem'>>();
+    const [date, setDate] = useState<any>(null);
 
     const onChange = (event: any, selectedDate: any) => {
         const currentDate = selectedDate;
@@ -61,7 +76,6 @@ export default function Register() {
     const { user } = useAuth()
 
     const dataKey = `@goFinance:transactions_user:${user.id}`;
-    const navigation = useNavigation()
 
     const [transationType, setTransactionType] = useState('')
     const [categoryOpenModal, setCategoryOpenModal] = useState(false)
@@ -70,11 +84,8 @@ export default function Register() {
         key: '',
     })
 
-
-    const { control, handleSubmit, formState: { errors }, reset } = useForm({
+    const { control, handleSubmit, formState: { errors }, reset, setValue, getValues, setError } = useForm({
         resolver: yupResolver(schema)
-
-
     })
 
     function handleTransactionsTypeSelect(type: 'positive' | 'negative') {
@@ -97,10 +108,23 @@ export default function Register() {
             return Alert.alert('Selecione a categoria');
         }
 
+        if (Number(form.amount) <= 0) {
+            setError('amount', {
+                type: 'required',
+                message: "Não pode ser negativo"
+            })
+            return;
+        }
+
+        const existId = getValues('id')
+        if (existId) {
+            await deleteCard(existId)
+        }
+
         const newTransaction = {
-            id: String(uuid.v4()),
+            id: existId ?? String(uuid.v4()),
             name: form.name,
-            amount: form.amount,
+            amount: Number(form.amount),
             type: transationType,
             category: category.key,
             date: date
@@ -123,30 +147,52 @@ export default function Register() {
             console.log(error)
             Alert.alert('Não foi possível cadastrar')
         }
-
         reset()
         setTransactionType('')
         setCategory({ key: '', name: '' })
-        navigation.navigate('Listagem')
+        setDate(null)
+        navigation.navigate('Listagem', '')
     }
 
     useEffect(() => {
-        async function loadData() {
-            const result = await AsyncStorage.getItem(dataKey)
+
+        if (route.params) {
+            const { amount: valueAmount, category: categoryParam, date: dateParam, id, name, type } = route.params;
+            setValue('id', id);
+            setValue('amount', String(valueAmount));
+            setValue('name', name);
+            setTransactionType(type);
+            setCategory({ key: categoryParam, name: categoryParam })
+            setDate(new Date(dateParam))
         }
-        loadData()
-
-
-    }, [])
+    }, [route.params])
 
     function formatDate(date: Date) {
         const formattedDate = date.toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
-        });
+        }).toString();
 
         return formattedDate;
+    }
+
+    // Metodo temporario até fazer a API
+    async function deleteCard(id: string) {
+        const response = await AsyncStorage.getItem(dataKey);
+        if (response) {
+            // converte para array
+            const convertedResponseInArray = JSON.parse(response)
+            //filtra pelas transaction menos a passada
+            const filterPayments = convertedResponseInArray.filter((transaction: any) => transaction.id !== id);
+            if (filterPayments) {
+                //converte em string para guardar no storage novamente
+                const convertedArrayToString = JSON.stringify(filterPayments)
+                AsyncStorage.setItem(dataKey, convertedArrayToString);
+
+            }
+        }
+
     }
 
     return (
