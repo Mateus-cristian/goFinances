@@ -21,6 +21,14 @@ export const Header = styled.View`
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  align-items: center;
+`;
+
+export const ContainerIcons = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  height: 100%;
+  width: ${RFValue(50)}px;
 `;
 
 export const Title = styled.Text`
