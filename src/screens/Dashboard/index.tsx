@@ -15,6 +15,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { RootStackParamList } from '../../@types/types'
 
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { database } from '../../../config/firebase'
+
 export interface DataListProps extends TransactionCardProps {
     id: string
 };
@@ -61,12 +64,21 @@ function Dashboard() {
 
     // Função que carrega os dados da página 
     async function loadTransactions() {
-        const response = await AsyncStorage.getItem(dataKey);
-        const transactions: DataListProps[] = response ? JSON.parse(response) : [];
+        let returnDataFirebase: any[] = []
+
+        const collectTasks = collection(database, "tasks");
+        const queryGetTasks = query(collectTasks, where("user", "==", dataKey));
+        const querySnapshot = await getDocs(queryGetTasks);
+        querySnapshot.forEach((doc) => {
+            returnDataFirebase.push(doc.data())
+        });
+
+        const transactions: DataListProps[] = returnDataFirebase;
         let entriesTotal = 0;
         let expensiveTotal = 0;
 
         const transactionsFormatted: DataListProps[] = transactions.map((item: DataListProps) => {
+            const dateFormatted = new Date(item.date).toISOString();
 
             if (item.type === 'positive') {
                 entriesTotal += Number(item.amount)
@@ -79,7 +91,7 @@ function Dashboard() {
                 day: '2-digit',
                 month: '2-digit',
                 year: '2-digit'
-            }).format(new Date(item.date))
+            }).format(new Date(dateFormatted))
 
             return {
                 id: item.id,

@@ -22,6 +22,9 @@ import { useAuth } from '../../hooks/auth'
 import { useRoute } from '@react-navigation/native';
 import { RootStackParamList } from '../../@types/types'
 
+import { collection, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+import { database } from "../../../config/firebase";
+
 interface FormData {
     name: string;
     amount: string
@@ -34,11 +37,11 @@ const schema = object().shape({
 })
 
 interface RouteParams {
-    amount: number;
-    category: string;
-    date: string;
     id: string;
     name: string;
+    category: string;
+    amount: number;
+    date: string;
     type: 'positive' | 'negative';
 }
 
@@ -131,17 +134,30 @@ export default function Register() {
         }
 
         try {
-            const data = await AsyncStorage.getItem(dataKey)
-            const currentData = data ? JSON.parse(data) : []
 
-            const dataFormatted =
-                [
-                    ...currentData,
-                    newTransaction
-                ]
+            const docSend = await addDoc(collection(database, "tasks"), {
+                id: existId ?? String(uuid.v4()),
+                name: form.name,
+                amount: Number(form.amount),
+                type: transationType,
+                category: category.key,
+                date: new Date(date).getTime(),
+                user: dataKey
+            });
 
 
-            await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted))
+
+            // const data = await AsyncStorage.getItem(dataKey)
+            // const currentData = data ? JSON.parse(data) : []
+
+            // const dataFormatted =
+            //     [
+            //         ...currentData,
+            //         newTransaction
+            //     ]
+
+
+            // await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted))
 
         } catch (error) {
             console.log(error)
