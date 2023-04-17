@@ -22,7 +22,7 @@ export const Title = styled.Text`
   color: ${({ theme }) => theme.colors.shape};
   font-family: ${({ theme }) => theme.fonts.regular};
 
-  font-size: ${RFValue(18)}px; ;
+  font-size: ${RFValue(16)}px; ;
 `;
 
 export const Form = styled.View`

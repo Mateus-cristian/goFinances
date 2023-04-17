@@ -12,6 +12,8 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'
 import { ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../hooks/auth';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { database } from '../../../config/firebase';
 
 
 export interface TransactionProps {
@@ -53,8 +55,19 @@ export default function Resume() {
 
     async function loadData() {
         const dataKey = `@goFinance:transactions_user:${user.id}`;
-        const response = await AsyncStorage.getItem(dataKey)
-        const responseFormatted: TransactionProps[] = response ? JSON.parse(response) : []
+
+
+        let returnDataFirebase: any[] = []
+
+        const collectTransactions = collection(database, "transactions");
+        const queryGetTransactions = query(collectTransactions, where("user", "==", dataKey));
+        const querySnapshot = await getDocs(queryGetTransactions);
+        querySnapshot.forEach((doc) => {
+            returnDataFirebase.push(doc.data())
+        });
+
+
+        const responseFormatted: TransactionProps[] = returnDataFirebase;
 
         const totalByCategory: CategoryData[] = [];
         const expensives = responseFormatted.filter((expensive) =>
