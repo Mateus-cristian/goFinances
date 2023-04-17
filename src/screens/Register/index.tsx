@@ -22,7 +22,7 @@ import { useAuth } from '../../hooks/auth'
 import { useRoute } from '@react-navigation/native';
 import { RootStackParamList } from '../../@types/types'
 
-import { collection, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc } from "firebase/firestore";
 import { database } from "../../../config/firebase";
 
 interface FormData {
@@ -43,6 +43,7 @@ interface RouteParams {
     amount: number;
     date: string;
     type: 'positive' | 'negative';
+    docId?: string;
 }
 
 
@@ -120,54 +121,47 @@ export default function Register() {
         }
 
         const existId = getValues('id')
+
+
         if (existId) {
-            await deleteCard(existId)
+            const documentId = route.params.docId
+            if (documentId) {
+                const idRef = await doc(database, "transactions", documentId);
+
+                await updateDoc(idRef, {
+                    id: existId,
+                    name: form.name,
+                    amount: Number(form.amount),
+                    type: transationType,
+                    category: category.key,
+                    date: new Date(date).getTime(),
+                    user: dataKey
+                });
+            }
+        } else {
+            try {
+                await addDoc(collection(database, "transactions"), {
+                    id: existId ?? String(uuid.v4()),
+                    name: form.name,
+                    amount: Number(form.amount),
+                    type: transationType,
+                    category: category.key,
+                    date: new Date(date).getTime(),
+                    user: dataKey
+                });
+
+            } catch (error) {
+                console.log(error)
+                Alert.alert('Não foi possível cadastrar')
+            }
         }
 
-        const newTransaction = {
-            id: existId ?? String(uuid.v4()),
-            name: form.name,
-            amount: Number(form.amount),
-            type: transationType,
-            category: category.key,
-            date: date
-        }
 
-        try {
-
-            const docSend = await addDoc(collection(database, "tasks"), {
-                id: existId ?? String(uuid.v4()),
-                name: form.name,
-                amount: Number(form.amount),
-                type: transationType,
-                category: category.key,
-                date: new Date(date).getTime(),
-                user: dataKey
-            });
-
-
-
-            // const data = await AsyncStorage.getItem(dataKey)
-            // const currentData = data ? JSON.parse(data) : []
-
-            // const dataFormatted =
-            //     [
-            //         ...currentData,
-            //         newTransaction
-            //     ]
-
-
-            // await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted))
-
-        } catch (error) {
-            console.log(error)
-            Alert.alert('Não foi possível cadastrar')
-        }
         reset()
         setTransactionType('')
         setCategory({ key: '', name: '' })
         setDate(null)
-        navigation.navigate('Listagem', '')
+        navigation.navigate('Listagem', [{}, ''])
     }
 
     useEffect(() => {

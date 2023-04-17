@@ -7,7 +7,7 @@ import {
     Transactions, LoadContainer, LogoutButton, Title, Container, Header, UserWrapper, UserInfo, Photo, User, UserGreeting, UserName, Icon, HighlightCards
 } from './styles'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, Alert } from 'react-native'
 import { useTheme } from 'styled-components'
 import { useAuth } from '../../hooks/auth'
 
@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { RootStackParamList } from '../../@types/types'
 
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 import { database } from '../../../config/firebase'
 
 export interface DataListProps extends TransactionCardProps {
@@ -66,9 +66,9 @@ function Dashboard() {
     async function loadTransactions() {
         let returnDataFirebase: any[] = []
 
-        const collectTasks = collection(database, "tasks");
-        const queryGetTasks = query(collectTasks, where("user", "==", dataKey));
-        const querySnapshot = await getDocs(queryGetTasks);
+        const collectTransactions = collection(database, "transactions");
+        const queryGetTransactions = query(collectTransactions, where("user", "==", dataKey));
+        const querySnapshot = await getDocs(queryGetTransactions);
         querySnapshot.forEach((doc) => {
             returnDataFirebase.push(doc.data())
         });
@@ -136,35 +136,37 @@ function Dashboard() {
 
     //deleta um card na HOME
     async function deleteCard(id: string) {
-        const response = await AsyncStorage.getItem(dataKey);
-        if (response) {
-            // converte para array
-            const convertedResponseInArray = JSON.parse(response)
-            //filtra pelas transaction menos a passada
-            const filterPayments = convertedResponseInArray.filter((transaction: any) => transaction.id !== id);
-            if (filterPayments) {
-                //converte em string para guardar no storage novamente
-                const convertedArrayToString = JSON.stringify(filterPayments)
-                AsyncStorage.setItem(dataKey, convertedArrayToString);
-                //carrega as transações para atualizar a página
-                loadTransactions()
-            }
-        }
+
+
+        await deleteDoc(doc(database, "id"));
+
+        loadTransactions()
+
+
 
     }
 
     async function editCard(id: string) {
-        const response = await AsyncStorage.getItem(dataKey);
-        if (response) {
-            // converte para array
-            const convertedResponseInArray = JSON.parse(response)
-            //filtra pelas transaction menos a passada
-            const filterPayments = convertedResponseInArray.filter((transaction: any) => transaction.id === id);
+        let transaction = {};
 
+        // Faz a busca pela coleção passando a query  
+        const collectTransaction = collection(database, "transactions");
+        const queryGetTransactions = query(collectTransaction, where("user", "==", dataKey), where("id", "==", id));
+        const querySnapshot = await getDocs(queryGetTransactions);
 
-            navigation.navigate('Cadastrar', filterPayments[0])
+        querySnapshot.forEach((doc) => {
+            if (doc.data()) {
+                transaction = doc.data()
+                transaction = { ...transaction, docId: doc.id }
+            }
+        });
+
+        // se existir vai para a pagina de cadastro de transações com as propriedades
+        if (transaction) {
+            navigation.navigate('Cadastrar', transaction)
+        } else {
+            Alert.alert("Erro na edição da transação")
         }
-
     }
 
     useEffect(() => {
