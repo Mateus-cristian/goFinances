@@ -133,25 +133,12 @@ function Dashboard() {
         setIsLoading(false)
     }
 
-
-    //deleta um card na HOME
-    async function deleteCard(id: string) {
-
-
-        await deleteDoc(doc(database, "id"));
-
-        loadTransactions()
-
-
-
-    }
-
-    async function editCard(id: string) {
+    const searchDocument = async (idDoc: string) => {
         let transaction = {};
 
         // Faz a busca pela coleção passando a query  
         const collectTransaction = collection(database, "transactions");
-        const queryGetTransactions = query(collectTransaction, where("user", "==", dataKey), where("id", "==", id));
+        const queryGetTransactions = query(collectTransaction, where("user", "==", dataKey), where("id", "==", idDoc));
         const querySnapshot = await getDocs(queryGetTransactions);
 
         querySnapshot.forEach((doc) => {
@@ -161,6 +148,22 @@ function Dashboard() {
             }
         });
 
+        return transaction;
+    }
+
+    //deleta um card na HOME
+    async function deleteCard(id: string) {
+        const transaction: any = await searchDocument(id);
+
+        const idRef = await doc(database, "transactions", transaction.docId);
+
+        await deleteDoc(idRef);
+        await loadTransactions()
+    }
+
+    async function editCard(id: string) {
+        const transaction: any = await searchDocument(id);
+        console.log(transaction)
         // se existir vai para a pagina de cadastro de transações com as propriedades
         if (transaction) {
             navigation.navigate('Cadastrar', transaction)
