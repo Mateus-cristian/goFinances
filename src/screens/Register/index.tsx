@@ -123,6 +123,13 @@ export default function Register() {
         const existId = getValues('id')
 
 
+        // Se o numero vier com , substitui por . para salvar como número
+        const amount: string = getValues('amount')
+        if (amount.includes(',')) {
+            const amountAux: string = amount.replace(',', '.');
+            setValue('amount', amountAux)
+        }
+
         if (existId) {
             const documentId = route.params.docId
             if (documentId) {
