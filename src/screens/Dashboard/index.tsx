@@ -163,7 +163,7 @@ function Dashboard() {
 
     async function editCard(id: string) {
         const transaction: any = await searchDocument(id);
-        console.log(transaction)
+
         // se existir vai para a pagina de cadastro de transações com as propriedades
         if (transaction) {
             navigation.navigate('Cadastrar', transaction)
@@ -173,7 +173,8 @@ function Dashboard() {
     }
 
     useEffect(() => {
-        // AsyncStorage.setItem(dataKey, '');
+        // Como esta na mesma página não recarrega apenas passa um objeto vazio ao parametro
+        navigation.navigate('Listagem', {})
         loadTransactions()
 
     }, [])

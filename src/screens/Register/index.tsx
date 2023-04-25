@@ -62,14 +62,11 @@ export default function Register() {
         DateTimePickerAndroid.open({
             value: date === null ? new Date() : date,
             onChange,
-
             is24Hour: true,
         });
     };
 
-    const showDatepicker = () => {
-        showMode('date');
-    };
+
 
     const showTimepicker = () => {
         showMode('time');
@@ -171,12 +168,17 @@ export default function Register() {
         navigation.navigate('Listagem', [{}, ''])
     }
 
+    function isEmpty(obj: {}) {
+        return Object.keys(obj).length === 0 && obj.constructor === Object;
+    }
+
     useEffect(() => {
 
         if (route.params) {
             const { amount: valueAmount, category: categoryParam, date: dateParam, id, name, type } = route.params;
+            const amountFormatted = valueAmount.toFixed(2).toString().replace(",", '.');
             setValue('id', id);
-            setValue('amount', String(valueAmount));
+            setValue('amount', amountFormatted);
             setValue('name', name);
             setTransactionType(type);
             setCategory({ key: categoryParam, name: categoryParam })
@@ -194,23 +196,7 @@ export default function Register() {
         return formattedDate;
     }
 
-    // Metodo temporario até fazer a API
-    async function deleteCard(id: string) {
-        const response = await AsyncStorage.getItem(dataKey);
-        if (response) {
-            // converte para array
-            const convertedResponseInArray = JSON.parse(response)
-            //filtra pelas transaction menos a passada
-            const filterPayments = convertedResponseInArray.filter((transaction: any) => transaction.id !== id);
-            if (filterPayments) {
-                //converte em string para guardar no storage novamente
-                const convertedArrayToString = JSON.stringify(filterPayments)
-                AsyncStorage.setItem(dataKey, convertedArrayToString);
 
-            }
-        }
-
-    }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
