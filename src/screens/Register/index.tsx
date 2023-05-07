@@ -24,6 +24,7 @@ import { RootStackParamList } from '../../@types/types'
 
 import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc } from "firebase/firestore";
 import { database } from "../../../config/firebase";
+import ButtonDate from '../../components/Forms/ButtonDate'
 
 interface FormData {
     name: string;
@@ -52,25 +53,6 @@ export default function Register() {
     const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
     const navigation = useNavigation<NavigationProp<RootStackParamList, 'Listagem'>>();
     const [date, setDate] = useState<any>(null);
-
-    const onChange = (event: any, selectedDate: any) => {
-        const currentDate = selectedDate;
-        setDate(currentDate);
-    };
-
-    const showMode = (currentMode: string) => {
-        DateTimePickerAndroid.open({
-            value: date === null ? new Date() : date,
-            onChange,
-            is24Hour: true,
-        });
-    };
-
-
-
-    const showTimepicker = () => {
-        showMode('time');
-    };
 
     //---------------------------------------------------------------------------
 
@@ -155,7 +137,6 @@ export default function Register() {
                 });
 
             } catch (error) {
-                console.log(error)
                 Alert.alert('Não foi possível cadastrar')
             }
         }
@@ -224,9 +205,9 @@ export default function Register() {
                             keyboardType='numeric'
                             error={errors.amount && errors.amount.message}
                         />
-                        <ButtonCalendar onPress={showTimepicker} title="Show time picker!">
-                            <TitleButtonCalendar>{`${date === null ? 'Data' : formatDate(date)}`}</TitleButtonCalendar>
-                        </ButtonCalendar>
+
+
+                        <ButtonDate date={date} setDate={setDate} title={`${date === null ? 'Data' : formatDate(date)}`} />
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
                             <TransactionTypeButton

@@ -5,9 +5,10 @@ import { TransactionCard, TransactionCardProps } from '../../components/Highligh
 import { TransactionsList } from '../../components/HighlightCard/TransactionCard/styles'
 import {
     Transactions, LoadContainer, LogoutButton, Title, Container, Header, UserWrapper, UserInfo, Photo, User, UserGreeting, UserName, Icon, HighlightCards
+    , ModalContent, ModalWrapper
 } from './styles'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActivityIndicator, Alert } from 'react-native'
+
+import { ActivityIndicator, Alert, View } from 'react-native'
 import { useTheme } from 'styled-components'
 import { useAuth } from '../../hooks/auth'
 
@@ -15,8 +16,13 @@ import { useNavigation } from '@react-navigation/native';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { RootStackParamList } from '../../@types/types'
 
-import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, orderBy, query, where } from "firebase/firestore";
 import { database } from '../../../config/firebase'
+import Button from '../../components/Forms/Button'
+import ButtonDate from '../../components/Forms/ButtonDate'
+import { formatDate } from '../../utils/date'
+
+import IconSvg from '@expo/vector-icons/FontAwesome5';
 
 export interface DataListProps extends TransactionCardProps {
     id: string
@@ -31,18 +37,21 @@ interface HighlightData {
     totalTransactions: string;
 }
 
-
-
 function Dashboard() {
     const { signOut, user } = useAuth()
 
     const [isLoading, setIsLoading] = useState(true)
     const [transactions, setTransactions] = useState<DataListProps[]>([]);
+
     const dataKey = `@goFinance:transactions_user:${user.id}`;
     const [highlightData, setHighlightData] = useState<HighlightData>({} as HighlightData)
 
+    const [openModal, setOpenModal] = useState(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList, 'Cadastrar'>>();
+
     const theme = useTheme()
+    const [antDate, setAntDate] = useState<Date | null>(null);
+    const [postDate, setPostDate] = useState<any>(null);
 
     function getLastTransactionData(collection: DataListProps[], type: 'positive' | 'negative') {
 
@@ -55,23 +64,25 @@ function Dashboard() {
             Math.max.apply(Math, collectionFiltered
                 .map((y) => new Date(y.date).getTime()))
         )
-
-
         return `${lastTransaction.getDate()} de ${lastTransaction.toLocaleString('pt-BR', { month: 'long' })}`
 
     }
 
 
     // Função que carrega os dados da página 
-    async function loadTransactions() {
-        let returnDataFirebase: any[] = []
+    async function loadTransactions(dataFilter?: any) {
 
-        const collectTransactions = collection(database, "transactions");
-        const queryGetTransactions = query(collectTransactions, where("user", "==", dataKey));
-        const querySnapshot = await getDocs(queryGetTransactions);
-        querySnapshot.forEach((doc) => {
-            returnDataFirebase.push(doc.data())
-        });
+        let returnDataFirebase: any[] = []
+        if (!dataFilter) {
+            const collectTransactions = collection(database, "transactions");
+            const queryGetTransactions = query(collectTransactions, where("user", "==", dataKey));
+            const querySnapshot = await getDocs(queryGetTransactions);
+            querySnapshot.forEach((doc) => {
+                returnDataFirebase.push(doc.data())
+            });
+        } else {
+            returnDataFirebase = dataFilter;
+        };
 
         const transactions: DataListProps[] = returnDataFirebase;
         let entriesTotal = 0;
@@ -158,18 +169,36 @@ function Dashboard() {
         const idRef = await doc(database, "transactions", transaction.docId);
 
         await deleteDoc(idRef);
-        await loadTransactions()
+        await loadTransactions();
     }
 
     async function editCard(id: string) {
         const transaction: any = await searchDocument(id);
-
         // se existir vai para a pagina de cadastro de transações com as propriedades
         if (transaction) {
             navigation.navigate('Cadastrar', transaction)
         } else {
             Alert.alert("Erro na edição da transação")
         }
+    }
+
+    // Função que faz o filtro das datas na home
+    async function filterData() {
+        let returnDataFirebase: any[] = []
+
+        const timeStampAntDate = antDate?.getTime();
+        const timeStampPostDate = postDate?.getTime();
+
+        const transactionsRef = collection(database, "transactions");
+        const data = query(transactionsRef, where("date", ">", timeStampAntDate), where("date", "<=", timeStampPostDate), orderBy("date"));
+
+        const querySnapshot = await getDocs(data);
+        querySnapshot.forEach((doc) => {
+            returnDataFirebase.push(doc.data())
+        });
+
+        await loadTransactions(returnDataFirebase);
+        setOpenModal(false);
     }
 
     useEffect(() => {
@@ -191,6 +220,7 @@ function Dashboard() {
                         <ActivityIndicator color={theme.colors.secondary} size='large' />
                     </LoadContainer> :
                     <>
+
                         <Header>
                             <UserWrapper>
                                 <UserInfo>
@@ -205,6 +235,7 @@ function Dashboard() {
                                 </LogoutButton>
                             </UserWrapper>
                         </Header>
+
                         <HighlightCards >
                             <HighlightCard type='up' title="Entradas" amount={highlightData.entries} lastTransaction={highlightData.lastTransactionEntriesDate} />
                             <HighlightCard type='down' title="Saidas" amount={highlightData.expensives} lastTransaction={highlightData.lastTransactionExpansiveDate} />
@@ -212,19 +243,39 @@ function Dashboard() {
                         </HighlightCards>
 
                         <Transactions>
-                            <Title>Listagem</Title>
+                            <View style={{ justifyContent: 'space-between', flexDirection: 'row', marginBottom: 15 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <IconSvg name="list-ul" size={14} style={{ marginRight: 7, marginBottom: 5 }} />
+                                    <Title onPress={() => loadTransactions()}>Listagem</Title>
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <IconSvg name="filter" size={14} style={{ marginRight: 7, marginBottom: 5 }} />
+                                    <Title onPress={() => setOpenModal(true)}>Filtro</Title>
+                                </View>
+                            </View>
 
                             <TransactionsList
                                 data={transactions}
                                 keyExtractor={item => item.id}
                                 renderItem={({ item }) => <TransactionCard key={item.id} data={item} deleteCard={deleteCard} editCard={editCard} />}
                             />
-
-
                         </Transactions>
+
+                        {openModal && (
+                            <ModalWrapper>
+                                <ModalContent>
+                                    <Title>Filtrar período</Title>
+                                    <ButtonDate date={antDate} label="Data Inicial" setDate={setAntDate} title={`${antDate === null ? 'Data' : formatDate(antDate)}`} />
+                                    <ButtonDate style={{ marginTop: 10 }} label="Data Final" date={postDate} setDate={setPostDate} title={`${postDate === null ? 'Data' : formatDate(postDate)}`} />
+
+                                    <Button style={{ marginTop: 10 }} title='Enviar' onPress={() => filterData()} />
+                                    <Button style={{ marginTop: 10 }} title='Cancelar' onPress={() => setOpenModal(false)} />
+                                </ModalContent>
+                            </ModalWrapper>
+                        )}
                     </>
             }
-        </Container>
+        </Container >
 
     )
 }

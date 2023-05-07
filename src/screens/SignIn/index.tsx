@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { ActivityIndicator, Alert, Platform } from 'react-native';
 import { Container, Header, Title, TitleWrapper, SignInTitle, Footer, FooterWrapper } from './styles'
+import MaterialIcon from '@expo/vector-icons/MaterialIcons'
 
 import { useTheme } from 'styled-components'
 
@@ -35,10 +36,12 @@ export function SignIn() {
         <Container>
             <Header>
                 <TitleWrapper>
+
                     <LogoSvg
                         width={RFValue(120)}
                         height={RFValue(68)}
                     />
+                    
                     <Title>
                         Controle suas {'\n'}
                         finanças de forma {'\n'}

@@ -84,10 +84,6 @@ export default function Resume() {
             expensives = responseFormatted.filter((expensive) => expensive.type === 'negative')
         }
 
-        console.log(expensives);
-        console.log(selectedDate);
-        console.log(onlyAllPeriod)
-
 
         const expensiveTotal = expensives
             .reduce((acumullator: number, expensive: TransactionProps) => {

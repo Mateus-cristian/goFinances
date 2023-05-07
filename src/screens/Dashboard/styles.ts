@@ -1,7 +1,6 @@
 import styled from "styled-components/native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { Feather } from "@expo/vector-icons";
-import { BorderlessButton } from "react-native-gesture-handler";
 
 export const Container = styled.View`
   flex: 1;
@@ -85,11 +84,34 @@ export const Transactions = styled.View`
 export const Title = styled.Text`
   font-size: ${RFValue(18)}px;
   font-family: ${({ theme }) => theme.fonts.regular};
-  margin-bottom: 16px;
 `;
 
 export const LoadContainer = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
+`;
+
+export const ButtonModal = styled.Button`
+  background: red;
+`;
+
+export const ModalWrapper = styled.View`
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+`;
+
+export const ModalContent = styled.View`
+  background-color: #f1f1f1;
+  margin: 60% auto;
+  padding: 20px;
+
+  border: 1.75px solid ${({ theme }) => theme.colors.primary};
+  border-radius: ${RFValue(12)}px;
+  width: 90%;
 `;
